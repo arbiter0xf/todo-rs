@@ -1,4 +1,6 @@
 use ncurses::*;
+//use serde_derive::Deserialize;
+use std::fs::read_to_string;
 use std::fs::File;
 use std::io::{self, Write, BufRead};
 use std::env;
@@ -73,6 +75,10 @@ impl Status {
     }
 }
 
+// fn parse_user_config_line(line: &str) {
+//     println!("parse_user_config_line: line is {}", line);
+// }
+
 fn parse_item(line: &str) -> Option<(Status, &str)> {
     let todo_prefix = "TODO: ";
     let done_prefix = "DONE: ";
@@ -107,6 +113,27 @@ fn list_transfer(list_dst: &mut Vec<String>, list_src: &mut Vec<String>, list_sr
             *list_src_curr = list_src.len() - 1;
         }
     }
+}
+
+// // arbiter0xf: I have no idea what #[derive(Deserialize)] does
+// #[derive(Deserialize)]
+// struct Config {
+//     testval: String,
+//     testval2: String,
+//     testval3: String,
+//     testval4: String,
+//     testval5: String,
+//     testval6: String,
+// }
+
+fn load_user_config() -> Result<(), Box<dyn std::error::Error + 'static>> {
+    let user_config_file = "/home/arbiter/my/codes/todo-rs/user_configuration.toml";
+
+    //let user_config_file_content = read_to_string(user_config_file)?.parse()?;
+    let user_config_file_content = read_to_string(user_config_file)?; // TODO handle error here instead of using ?
+    println!("load_user_config: user_config_file_content is: {}", user_config_file_content);
+    //let config: Config = toml::from_str(user_config_file_content).unwrap();
+    Ok(())
 }
 
 fn load_state(todos: &mut Vec<String>, dones: &mut Vec<String>, file_path: &str) {
@@ -160,20 +187,23 @@ fn main() {
 
     load_state(&mut todos, &mut dones, &file_path);
 
-    initscr();
-    noecho();
-    curs_set(CURSOR_VISIBILITY::CURSOR_INVISIBLE);
+    // initscr();
+    // noecho();
+    // curs_set(CURSOR_VISIBILITY::CURSOR_INVISIBLE);
 
-    start_color();
-    init_pair(REGULAR_PAIR, COLOR_WHITE, COLOR_BLACK);
-    init_pair(HIGHLIGHT_PAIR, COLOR_BLACK, COLOR_WHITE);
+    // start_color();
+    // init_pair(REGULAR_PAIR, COLOR_WHITE, COLOR_BLACK);
+    // init_pair(HIGHLIGHT_PAIR, COLOR_BLACK, COLOR_WHITE);
+
+    load_user_config();
+    return;
 
     let mut quit = false;
     let mut tab = Status::Todo;
 
     let mut ui = Ui::default();
     while !quit {
-        erase();
+        // erase();
 
         ui.begin(0, 0);
         {
@@ -200,7 +230,7 @@ fn main() {
         }
         ui.end();
 
-        refresh();
+        // refresh();
 
         let key = getch();
         match key as u8 as char {
@@ -228,5 +258,5 @@ fn main() {
 
     save_state(&todos, &dones, &file_path);
 
-    endwin();
+    // endwin();
 }
